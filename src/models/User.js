@@ -63,16 +63,14 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
-  next();
 });
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password") || this.isNew) return next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password") || this.isNew) return;
   this.passwordChangedAt = Date.now() - 1000;
-  next();
 });
 userSchema.methods.correctPassword = async (
   candidatePassword,
@@ -100,9 +98,8 @@ userSchema.methods.createPasswordToken = function () {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   return resetToken;
 };
-userSchema.pre(/^find/, function (next) {
+userSchema.pre(/^find/, function () {
   this.find({ isActive: true }); // find only true ones
-  next();
 });
 const User = mongoose.model("User", userSchema);
 module.exports = User;

@@ -50,13 +50,10 @@ app.use((req, res, next) => {
 
 // 2) Route handlers
 
-app.use("/api/v1/auth ", authRouter);
+app.use("/api/v1/auth", authRouter);
 //app.use("/api/v1/");
 
-// Test route
-app.get("/", (req, res) => {
-  res.json({ message: "CRM SaaS API is running!" });
-});
+
 app.all("*", (req, res, next) => {
   res.status(404).json({
     status: "fail",
