@@ -137,4 +137,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await user.save();
   createSendToken(user, 200, res);
 });
-exports.me = catchAsync((req, res, next) => {});
+exports.me = catchAsync((req, res, next) => {
+  res.status(200).json({
+    user: req.user,
+  });
+});
