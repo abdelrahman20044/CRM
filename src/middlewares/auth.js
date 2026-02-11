@@ -3,7 +3,7 @@ const User = require("../models/User");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
 const { promisify } = require("util");
-const protect = catchAsync(async (req, res, next) => {
+exports.protect = catchAsync(async (req, res, next) => {
   // 1. Get token from header or cookie
   let token;
   if (
@@ -44,4 +44,11 @@ const protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-module.exports = protect;
+exports.restrictedTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError("you are not allowed to do this", 401));
+    }
+    next();
+  };
+};

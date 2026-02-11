@@ -15,8 +15,8 @@ const cookieOptions = {
   expires: new Date(
     Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
   ),
-  httpOnly: true, // cookie cannot be accesed or modified in any way by the browser to prevent (xss)
-  // when browser see httponly = true it will receive the cookie store it and send it with every req
+  httpOnly: true, // cookie cannot be accessed or modified in any way by the browser to prevent (xss)
+  // when browser see httpOnly = true it will receive the cookie store it and send it with every req
 };
 
 if (process.env.NODE_ENV == "production") cookieOptions.secure = true; // cookie will only be sent in encrypted connection (HTTPS)
@@ -139,6 +139,9 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 });
 exports.me = catchAsync((req, res, next) => {
   res.status(200).json({
-    user: req.user,
+    status: "success",
+    data: {
+      user: req.user,
+    },
   });
 });
