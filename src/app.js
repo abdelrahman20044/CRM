@@ -7,7 +7,8 @@ const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
 const app = express();
 const authRouter = require("./routes/authRoutes");
-
+const contactRoutes = require("./routes/contactRoutes");
+const dealRoutes = require("./routes/dealRoutes");
 // Set security HTTP headers
 app.use(helmet());
 
@@ -51,8 +52,10 @@ app.use((req, res, next) => {
 // 2) Route handlers
 
 app.use("/api/v1/auth", authRouter);
-//app.use("/api/v1/");
+app.use("/api/v1/contacts", contactRoutes);
+app.use("/api/v1/deals", dealRoutes);
 
+//app.use("/api/v1/");
 
 app.all("*", (req, res, next) => {
   res.status(404).json({

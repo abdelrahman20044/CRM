@@ -7,6 +7,7 @@ const {
   updateContact,
   deleteContact,
   assignContact,
+  // getContactStats,
 } = require("../controllers/contactController");
 
 const { protect, restrictedTo } = require("../middlewares/auth");
@@ -20,3 +21,5 @@ router
   .get(getContact)
   .patch(updateContact)
   .delete(restrictedTo("owner", "admin"), deleteContact);
+
+module.exports = router;
