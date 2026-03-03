@@ -38,6 +38,8 @@ const companySchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
+companySchema.pre(/^find/, function () {
+  this.find({ isActive: true });
+});
 const Company = mongoose.model("Company", companySchema);
 module.exports = Company;

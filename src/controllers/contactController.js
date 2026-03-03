@@ -109,11 +109,8 @@ exports.assignContact = catchAsync(async (req, res, next) => {
 exports.updateContact = catchAsync(async (req, res, next) => {
   const filter = buildContactFilter(req, req.params.id);
 
-  // Non admin/owner can't change these fields
-  if (!["admin", "owner"].includes(req.user.role)) {
-    delete req.body.company;
-    delete req.body.assignedTo;
-  }
+  delete req.body.company;
+  delete req.body.assignedTo;
 
   const contact = await Contact.findOneAndUpdate(filter, req.body, {
     new: true,

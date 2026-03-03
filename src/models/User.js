@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema(
     },
     passwordResetToken: {
       type: String,
-      select: false, // not included in the response
+      select: false, 
     },
     passwordResetExpires: {
       type: Date,

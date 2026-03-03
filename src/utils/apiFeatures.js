@@ -1,6 +1,6 @@
 class ApiFeatures {
   constructor(query, queryString) {
-    this.query = query; //tour.find()
+    this.query = query; //.find()
     this.queryString = queryString; // req query
   }
 

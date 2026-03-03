@@ -10,7 +10,7 @@ const contactSchema = new mongoose.Schema(
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      //required: true,
+      required: true,
     },
     name: {
       type: String,

@@ -5,7 +5,7 @@ const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
 const APIFeatures = require("../utils/apiFeatures");
 
-// helper: base filter for multi-tenancy + role scoping
+// base filter for multi-tenancy + role scoping
 const buildDealFilter = (req, dealId) => {
   const filter = { company: req.user.company };
 

@@ -72,14 +72,13 @@ dealSchema.index({ company: 1, createdAt: -1 });
 dealSchema.index({ company: 1, stage: 1 });
 dealSchema.index({ company: 1, assignedTo: 1, createdAt: -1 });
 
-dealSchema.pre("save", function (next) {
+dealSchema.pre("save", function () {
   if (
     this.isModified("stage") &&
     (this.stage === "won" || this.stage === "lost")
   ) {
     if (!this.closedAt) this.closedAt = new Date();
   }
-  next();
 });
 
 const Deal = mongoose.model("Deal", dealSchema);

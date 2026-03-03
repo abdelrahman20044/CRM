@@ -47,16 +47,16 @@ exports.register = catchAsync(async (req, res, next) => {
   });
 
   // 2. Create user as OWNER (never from req.body.role)
-  try {
-    const user = await User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
-      passwordConfirm: req.body.passwordConfirm,
-      company: company._id,
-      role: "owner", // ← Always owner for registration
-    });
-    /*res.status(201).json({
+
+  const user = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    passwordConfirm: req.body.passwordConfirm,
+    company: company._id,
+    role: "owner", // ← Always owner for registration
+  });
+  /*res.status(201).json({
       status: "success",
       token,
       data: {
@@ -64,13 +64,8 @@ exports.register = catchAsync(async (req, res, next) => {
       },
     });*/
 
-    // 3. Send token
-    createSendToken(user, 201, res);
-  } catch (error) {
-    // If user creation fails, delete the company we just created
-    await Company.findByIdAndDelete(company._id);
-    throw error; // Re-throw to be handled by catchAsync
-  }
+  // 3. Send token
+  createSendToken(user, 201, res);
 });
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
