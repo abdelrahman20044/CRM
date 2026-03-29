@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const catchAsync = require("../utils/catchAsync");
-const AppError = require("../utils/AppError");
+const AppError = require("../utils/appError");
 const { promisify } = require("util");
 exports.protect = catchAsync(async (req, res, next) => {
   // 1. Get token from header or cookie
@@ -47,7 +47,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.restrictedTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return next(new AppError("you are not allowed to do this", 401));
+      return next(new AppError("you are not allowed to do this", 403));
     }
     next();
   };

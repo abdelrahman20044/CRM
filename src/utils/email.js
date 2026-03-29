@@ -22,3 +22,10 @@ const sendEmail = async (options) => {
 };
 
 module.exports = sendEmail;
+
+/*the host is the email service and port is the how server connect to it (email port)
+the user and the pass here to tell mailtrap this me I'm the server
+so in in this transporter creation step is to establish the connection between the mailtrap and the server
+and then send email method is the method that we use to send an email to user
+transporter.sendMail(maiOptions);
+so this mean transporter which is the connection between mailtrap and server send email from the server to the user mailtrap email which is option.email and send the message etch..*/

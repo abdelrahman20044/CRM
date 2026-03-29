@@ -1,7 +1,7 @@
 const User = require("./../models/User");
 const Company = require("./../models/Company");
 const catchAsync = require("./../utils/catchAsync");
-const AppError = require("./../utils/AppError");
+const AppError = require("./../utils/appError");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
@@ -99,7 +99,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
       message: "Token sent to email!",
     });
   } catch (err) {
-    console.log("EMAIL ERROR:", err); // Debug line
+    console.log("EMAIL ERROR:", err);
     ((user.passwordResetToken = undefined),
       (user.passwordResetExpires = undefined));
     await user.save({ validateBeforeSave: false });

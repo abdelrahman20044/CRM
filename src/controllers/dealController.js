@@ -1,12 +1,11 @@
 const Deal = require("../models/Deal");
 const Contact = require("../models/Contact");
 const User = require("../models/User");
-const AppError = require("../utils/AppError");
+const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const APIFeatures = require("../utils/apiFeatures");
-
-// base filter for multi-tenancy + role scoping
-const buildDealFilter = (req, dealId) => {
+const  buildFilter  = require("../utils/buildfilter");
+/*const buildFilter = (req, dealId) => {
   const filter = { company: req.user.company };
 
   if (dealId) filter._id = dealId;
@@ -16,10 +15,10 @@ const buildDealFilter = (req, dealId) => {
   }
 
   return filter;
-};
+};*/
 
 exports.getAllDeals = catchAsync(async (req, res, next) => {
-  const query = buildDealFilter(req);
+  const query = buildFilter(req);
 
   const features = new APIFeatures(Deal.find(query), req.query)
     .filter()
@@ -39,7 +38,7 @@ exports.getAllDeals = catchAsync(async (req, res, next) => {
 });
 
 exports.getDeal = catchAsync(async (req, res, next) => {
-  const filter = buildDealFilter(req, req.params.id);
+  const filter = buildFilter(req, req.params.id);
 
   const deal = await Deal.findOne(filter)
     .populate("assignedTo", "name email")
@@ -85,7 +84,7 @@ exports.createDeal = catchAsync(async (req, res, next) => {
 });
 
 exports.updateDeal = catchAsync(async (req, res, next) => {
-  const filter = buildDealFilter(req, req.params.id);
+  const filter = buildFilter(req, req.params.id);
 
   delete req.body.company;
   delete req.body.assignedTo;
@@ -117,7 +116,7 @@ exports.changeDealStage = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid stage value", 400));
   }
 
-  const filter = buildDealFilter(req, req.params.id);
+  const filter = buildFilter(req, req.params.id);
 
   const update = { stage };
   if (stage === "won" || stage === "lost") update.closedAt = new Date();
@@ -156,9 +155,10 @@ exports.assignDeal = catchAsync(async (req, res, next) => {
     return next(new AppError("User not found in your company", 404));
   }
 
+  const filter = buildFilter(req, req.params.id);
   const deal = await Deal.findOneAndUpdate(
-    { _id: req.params.id, company: req.user.company },
-    { assignedTo: user._id }, // validated value
+    filter,
+    { assignedTo: user._id },
     { new: true, runValidators: true },
   )
     .populate("assignedTo", "name email")
@@ -175,10 +175,8 @@ exports.assignDeal = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteDeal = catchAsync(async (req, res, next) => {
-  const deal = await Deal.findOneAndDelete({
-    _id: req.params.id,
-    company: req.user.company,
-  });
+  const filter = buildFilter(req, req.params.id);
+  const deal = await Deal.findOneAndDelete(filter);
 
   if (!deal) {
     return next(new AppError("No deal found with that ID", 404));

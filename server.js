@@ -11,6 +11,10 @@ process.on("uncaughtException", (err) => {
 });
 const app = require("./src/app");
 
+connectDB().catch((err) => {
+  console.log(err);
+  process.exit(1);
+});
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

@@ -43,7 +43,7 @@ const contactSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// ✅ unique per company (only when email exists)
+// unique per company (only when email exists)
 contactSchema.index({ company: 1, email: 1 }, { unique: true, sparse: true });
 
 contactSchema.index({ company: 1, createdAt: -1 });

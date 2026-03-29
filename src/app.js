@@ -10,6 +10,8 @@ const authRouter = require("./routes/authRoutes");
 const contactRouter = require("./routes/contactRoutes");
 const dealRouter = require("./routes/dealRoutes");
 const dashboardRouter = require("./routes/dashboardRoutes");
+const userRouter = require("./routes/userRoutes");
+const taskRouter = require("./routes/taskRoutes");
 
 // Set security HTTP headers
 app.use(helmet());
@@ -54,9 +56,11 @@ app.use((req, res, next) => {
 // 2) Route handlers
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", userRouter);
 app.use("/api/v1/contacts", contactRouter);
 app.use("/api/v1/deals", dealRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
+app.use("/api/v1/tasks", taskRouter);
 
 //app.use("/api/v1/");
 

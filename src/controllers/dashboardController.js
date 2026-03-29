@@ -19,7 +19,6 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
     { $match: { company: companyId, stage: "won" } },
     { $group: { _id: null, totalRevenue: { $sum: "$value" } } },
   ]);
-  console.log("Aggregate result:", revenueResult);
 
   const totalRevenue = revenueResult[0]?.totalRevenue || 0;
 
