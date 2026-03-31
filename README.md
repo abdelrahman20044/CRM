@@ -21,6 +21,7 @@ A multi-tenant Customer Relationship Management REST API built with Node.js, Exp
 - **Task Management** — Priority levels, status tracking, polymorphic linking to contacts or deals.
 - **Dashboard Analytics** — Revenue totals, deal counts, and pipeline breakdown via MongoDB aggregation.
 - **Global Error Handling** — Centralized error controller with dev/production modes and Mongoose-specific error handling.
+- **Activity Log** — Track calls, emails, meetings, notes, and system events linked to contacts, deals, or tasks.
 - **API Features** — Filtering (with `gte/lte` operators), sorting, field selection, and pagination on all list endpoints.
 
 ## Getting Started
@@ -124,6 +125,16 @@ npm run start:prod
 | PATCH | `/api/v1/tasks/:id/status` | Change task status |
 | PATCH | `/api/v1/tasks/:id/assign` | Reassign task |
 
+### Activities
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/activities` | List activities (filter by `relatedTo` & `relatedId`) |
+| GET | `/api/v1/activities/:id` | Get activity |
+| POST | `/api/v1/activities` | Log an activity |
+| PATCH | `/api/v1/activities/:id` | Update activity |
+| DELETE | `/api/v1/activities/:id` | Delete activity (Owner/Admin) |
+
 ### Dashboard
 
 | Method | Endpoint | Description |
@@ -158,13 +169,15 @@ crm-saas/
     │   ├── User.js            # User with roles, password hashing, reset tokens
     │   ├── Contact.js         # Lead/contact with source and status tracking
     │   ├── Deal.js            # Sales deal with pipeline stages
-    │   └── Task.js            # Task with priority, polymorphic relations
+    │   ├── Task.js            # Task with priority, polymorphic relations
+    │   └── Activity.js        # Activity log with polymorphic entity linking
     ├── controllers/
     │   ├── authController.js  # Register, login, forgot/reset password
     │   ├── userController.js  # Team member CRUD
     │   ├── contactController.js
     │   ├── dealController.js  # Includes stage change and assignment
     │   ├── taskController.js
+    │   ├── activityController.js
     │   ├── dashboardController.js  # Aggregation-based analytics
     │   └── errorController.js # Global error handler (dev/prod)
     ├── routes/
@@ -173,6 +186,7 @@ crm-saas/
     │   ├── contactRoutes.js
     │   ├── dealRoutes.js
     │   ├── taskRoutes.js
+    │   ├── activityRoutes.js
     │   └── dashboardRoutes.js
     ├── middlewares/
     │   └── auth.js            # JWT verification + role restriction

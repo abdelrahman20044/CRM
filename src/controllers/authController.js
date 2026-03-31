@@ -4,8 +4,8 @@ const catchAsync = require("./../utils/catchAsync");
 const AppError = require("./../utils/appError");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-
 const sendEmail = require("./../utils/email");
+
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.EXPIRES_IN,
@@ -24,7 +24,6 @@ const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   res.cookie("jwt", token, cookieOptions);
 
-  // Remove sensitive fields from output
   user.password = undefined;
   user.isActive = undefined;
 
@@ -38,15 +37,12 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.register = catchAsync(async (req, res, next) => {
-  // 1. Create company first
   const company = await Company.create({
     name: req.body.companyName,
     address: req.body.companyAddress,
     email: req.body.companyEmail,
     phone: req.body.companyPhone,
   });
-
-  // 2. Create user as OWNER (never from req.body.role)
 
   const user = await User.create({
     name: req.body.name,
@@ -56,15 +52,6 @@ exports.register = catchAsync(async (req, res, next) => {
     company: company._id,
     role: "owner", // ← Always owner for registration
   });
-  /*res.status(201).json({
-      status: "success",
-      token,
-      data: {
-        user,
-      },
-    });*/
-
-  // 3. Send token
   createSendToken(user, 201, res);
 });
 exports.login = catchAsync(async (req, res, next) => {
@@ -139,4 +126,16 @@ exports.me = catchAsync((req, res, next) => {
       user: req.user,
     },
   });
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { passwordCurrent, password, passwordConfirm } = req.body;
+  const user = await User.findById(req.user.id).select("+password");
+  if (!(await user.correctPassword(passwordCurrent, user.password))) {
+    return next(new AppError("Your current password is wrong", 401));
+  }
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  await user.save();
+  createSendToken(user, 200, res);
 });

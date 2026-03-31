@@ -13,6 +13,7 @@ const dealRouter = require("./routes/dealRoutes");
 const dashboardRouter = require("./routes/dashboardRoutes");
 const userRouter = require("./routes/userRoutes");
 const taskRouter = require("./routes/taskRoutes");
+const activityRouter = require("./routes/activityRoutes");
 const globalErorr = require("./controllers/errorController");
 const AppError = require("./utils/appError");
 
@@ -73,6 +74,7 @@ app.use("/api/v1/contacts", contactRouter);
 app.use("/api/v1/deals", dealRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/tasks", taskRouter);
+app.use("/api/v1/activities", activityRouter);
 
 
 app.all("*", (req, res, next) => {
