@@ -40,6 +40,7 @@ exports.createTask = catchAsync(async(req,res,next)=>{
         status: req.body.status,
         priority: req.body.priority,
         assignedTo: req.user._id,
+        createdBy: req.user._id,
         company: req.user.company,
     });
     res.status(201).json({

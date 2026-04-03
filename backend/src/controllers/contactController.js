@@ -60,6 +60,7 @@ exports.createContact = catchAsync(async (req, res, next) => {
     phone: req.body.phone,
     source: req.body.source,
     status: req.body.status,
+    notes: req.body.notes,
 
     // server-enforced fields
     assignedTo: req.user._id,

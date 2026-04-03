@@ -1,0 +1,101 @@
+﻿ D .eslintrc.json
+ D .gitignore
+ D .prettierrc
+ D README.md
+A  backend/.eslintrc.json
+A  backend/.gitignore
+A  backend/.prettierrc
+A  backend/README.md
+A  backend/package-lock.json
+A  backend/package.json
+A  backend/server.js
+A  backend/src/app.js
+A  backend/src/config/db.js
+A  backend/src/controllers/activityController.js
+A  backend/src/controllers/authController.js
+A  backend/src/controllers/contactController.js
+A  backend/src/controllers/dashboardController.js
+A  backend/src/controllers/dealController.js
+A  backend/src/controllers/errorController.js
+A  backend/src/controllers/taskController.js
+A  backend/src/controllers/userController.js
+A  backend/src/middlewares/auth.js
+A  backend/src/models/Activity.js
+A  backend/src/models/Company.js
+A  backend/src/models/Contact.js
+A  backend/src/models/Deal.js
+A  backend/src/models/Task.js
+A  backend/src/models/User.js
+A  backend/src/routes/activityRoutes.js
+A  backend/src/routes/authRoutes.js
+A  backend/src/routes/contactRoutes.js
+A  backend/src/routes/dashboardRoutes.js
+A  backend/src/routes/dealRoutes.js
+A  backend/src/routes/taskRoutes.js
+A  backend/src/routes/userRoutes.js
+A  backend/src/utils/apiFeatures.js
+A  backend/src/utils/appError.js
+A  backend/src/utils/buildfilter.js
+A  backend/src/utils/catchAsync.js
+A  backend/src/utils/email.js
+A  frontend/.gitignore
+A  frontend/README.md
+A  frontend/eslint.config.js
+A  frontend/index.html
+A  frontend/package-lock.json
+A  frontend/package.json
+A  frontend/public/favicon.svg
+A  frontend/public/icons.svg
+A  frontend/src/App.css
+A  frontend/src/App.jsx
+A  frontend/src/assets/hero.png
+A  frontend/src/assets/react.svg
+A  frontend/src/assets/vite.svg
+A  frontend/src/context/AuthContext.jsx
+A  frontend/src/index.css
+A  frontend/src/main.jsx
+A  frontend/src/pages/Activities.jsx
+A  frontend/src/pages/Contacts.jsx
+A  frontend/src/pages/Dashboard.jsx
+A  frontend/src/pages/Deals.jsx
+A  frontend/src/pages/ForgotPassword.jsx
+A  frontend/src/pages/Login.jsx
+A  frontend/src/pages/Profile.jsx
+A  frontend/src/pages/Register.jsx
+A  frontend/src/pages/ResetPassword.jsx
+A  frontend/src/pages/Tasks.jsx
+A  frontend/src/services/api.js
+A  frontend/vite.config.js
+ D package-lock.json
+ D package.json
+ D server.js
+ D src/app.js
+ D src/config/db.js
+ D src/controllers/activityController.js
+ D src/controllers/authController.js
+ D src/controllers/contactController.js
+ D src/controllers/dashboardController.js
+ D src/controllers/dealController.js
+ D src/controllers/errorController.js
+ D src/controllers/taskController.js
+ D src/controllers/userController.js
+ D src/middlewares/auth.js
+ D src/models/Activity.js
+ D src/models/Company.js
+ D src/models/Contact.js
+ D src/models/Deal.js
+ D src/models/Task.js
+ D src/models/User.js
+ D src/routes/activityRoutes.js
+ D src/routes/authRoutes.js
+ D src/routes/contactRoutes.js
+ D src/routes/dashboardRoutes.js
+ D src/routes/dealRoutes.js
+ D src/routes/taskRoutes.js
+ D src/routes/userRoutes.js
+ D src/utils/AppError.js
+ D src/utils/apiFeatures.js
+ D src/utils/buildfilter.js
+ D src/utils/catchAsync.js
+ D src/utils/email.js
+?? git_status.txt

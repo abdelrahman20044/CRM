@@ -71,13 +71,12 @@ const taskSchema = new mongoose.Schema(
 taskSchema.index({ company: 1, assignedTo: 1, status: 1 });
 taskSchema.index({ company: 1, dueDate: 1 });
 
-taskSchema.pre("save", function (next) {
+taskSchema.pre("save", function () {
   if (this.isModified("status") && this.status === "completed") {
     if (!this.completedAt) {
       this.completedAt = new Date();
     }
   }
-  next();
 });
 
 module.exports = mongoose.model("Task", taskSchema);

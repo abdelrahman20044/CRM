@@ -71,9 +71,14 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
   const resetToken = user.createPasswordToken();
   await user.save({ validateBeforeSave: false });
-  const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
+  /*
+   const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
   //const resetURL2 = URL(req.protocol, req.get('host'), resetToken);
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL} .\nIf you didn't forget your password, please ignore this email.`;
+  */
+  const frontendURL = process.env.FRONTEND_URL || "http://localhost:5173";
+  const resetURL = `${frontendURL}/reset-password/${resetToken}`;
+  const message = `Forgot your password? Please reset your password securely by clicking here: \n\n${resetURL}\n\nIf you didn't forget your password, please ignore this email.`;
   try {
     await sendEmail({
       email: user.email,
