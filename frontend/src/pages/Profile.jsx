@@ -45,7 +45,13 @@ const Profile = () => {
     }
   };
 
-  if (!user) return <p>Loading profile...</p>;
+  if (!user) return (
+    <div style={{ position: 'relative', height: '100%', maxWidth: '800px' }}>
+      <div className="stat-card" style={{ padding: '3rem', textAlign: 'center' }}>
+        <p style={{ color: 'var(--text-muted)' }}>Loading profile...</p>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ position: 'relative', height: '100%', maxWidth: '800px' }}>

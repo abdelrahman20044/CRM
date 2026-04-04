@@ -146,7 +146,7 @@ const Tasks = () => {
                       style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.25rem 0.5rem' }}
                     >
                         <option value="pending">Pending</option>
-                        <option value="in_progress">In Progress</option>
+                        <option value="in-progress">In Progress</option>
                         <option value="completed">Completed</option>
                         <option value="canceled">Canceled</option>
                     </select>
@@ -175,7 +175,7 @@ const Tasks = () => {
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <select name="status" value={formData.status} onChange={handleInputChange} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: 'white' }}>
                     <option value="pending">Pending</option>
-                    <option value="in_progress">In Progress</option>
+                    <option value="in-progress">In Progress</option>
                     <option value="completed">Completed</option>
                     <option value="canceled">Canceled</option>
                 </select>

@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 export const AuthContext = createContext(null);
 
@@ -14,9 +14,7 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('jwt');
         if (token) {
             // Hit the /me endpoint to validate token and fetch user details
-            const res = await axios.get('/api/v1/auth/me', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get('/auth/me');
             setUser(res.data.data.user);
         }
       } catch (err) {
@@ -29,14 +27,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const res = await axios.post('/api/v1/auth/login', { email, password });
+    const res = await api.post('/auth/login', { email, password });
     localStorage.setItem('jwt', res.data.token);
     setUser(res.data.data.user);
     return res.data;
   };
 
   const registerUser = async (userData) => {
-    const res = await axios.post('/api/v1/auth/register', userData);
+    const res = await api.post('/auth/register', userData);
     localStorage.setItem('jwt', res.data.token);
     setUser(res.data.data.user);
     return res.data;

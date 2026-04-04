@@ -18,13 +18,27 @@ const globalErorr = require("./controllers/errorController");
 const AppError = require("./utils/appError");
 
 // CORS
-app.use(cors({
-  origin: true,       // allow all origins 
-  methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-}));
-app.options("*", cors());   // handle preflight requests
+const allowedOrigins = [
+  "http://localhost:5173", // local dev
+  process.env.FRONTEND_URL, // Vercel frontend URL
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
+app.options("*", cors()); // handle preflight requests
 
 // Set security HTTP headers
 app.use(helmet());
@@ -36,7 +50,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Limiting requests from same API
 const limiter = rateLimit({
-  max: 100,
+  max: 300,
   windowMs: 60 * 60 * 1000, // 1 hour
   message: "Too many requests from this IP, please try again in an hour!",
 });
@@ -76,10 +90,8 @@ app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/tasks", taskRouter);
 app.use("/api/v1/activities", activityRouter);
 
-
 app.all("*", (req, res, next) => {
   next(new AppError(`can't find ${req.originalUrl} on this server`, 404));
-
 });
 app.use(globalErorr);
 

@@ -71,7 +71,17 @@ const Deals = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.patch(`/deals/${selectedDeal._id}`, { ...formData, value: Number(formData.value) || 0 });
+      // Stage changes use a dedicated endpoint
+      const currentStage = selectedDeal.stage;
+      const newStage = formData.stage;
+      const { stage: _stage, ...updateData } = formData;
+
+      await api.patch(`/deals/${selectedDeal._id}`, { ...updateData, value: Number(updateData.value) || 0 });
+
+      if (newStage !== currentStage) {
+        await api.patch(`/deals/${selectedDeal._id}/stage`, { stage: newStage });
+      }
+
       setShowEditModal(false);
       fetchData();
     } catch (err) {
