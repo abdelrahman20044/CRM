@@ -108,6 +108,16 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/api/v1/debug-db", (req, res) => {
+  const mongoose = require("mongoose");
+  res.status(200).json({
+    readyState: mongoose.connection.readyState, // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+    hasDatabaseUrl: !!process.env.DATABASE2,
+    hasDatabasePassword: !!process.env.DATABASE_PASSWORD2,
+    dbValueMasked: process.env.DATABASE2 ? process.env.DATABASE2.substring(0, 15) + "..." : "missing",
+  });
+});
+
 app.all("*", (req, res, next) => {
   next(new AppError(`can't find ${req.originalUrl} on this server`, 404));
 });
