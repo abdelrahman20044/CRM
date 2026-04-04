@@ -1,13 +1,24 @@
 const mongoose = require("mongoose");
 
-const DB = process.env.DATABASE2.replace(
-  "<db_password>",
-  process.env.DATABASE_PASSWORD2,
-);
+let isConnected = false;
 
 const connectDB = async () => {
-  await mongoose.connect(DB);
-  console.log("DB connection successful");
+  if (isConnected) {
+    return;
+  }
+
+  const DB = process.env.DATABASE2.replace(
+    "<db_password>",
+    process.env.DATABASE_PASSWORD2,
+  );
+
+  try {
+    const db = await mongoose.connect(DB);
+    isConnected = db.connections[0].readyState;
+    console.log("DB connection successful");
+  } catch (err) {
+    console.log("DB Connection Error:", err);
+  }
 };
 
 module.exports = connectDB;

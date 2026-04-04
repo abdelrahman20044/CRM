@@ -11,13 +11,12 @@ process.on("uncaughtException", (err) => {
 });
 const app = require("./src/app");
 
-connectDB().catch((err) => {
-  console.log(err);
-  // Don't process.exit here, it can crash Vercel's serverless environment
-});
-
 // Vercel handles the server listening implicitly. We only manually listen if not on Vercel production.
 if (process.env.NODE_ENV !== "production") {
+  connectDB().catch((err) => {
+    console.log(err);
+  });
+
   const port = process.env.PORT || 3000;
   const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

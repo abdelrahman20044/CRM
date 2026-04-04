@@ -16,6 +16,13 @@ const taskRouter = require("./routes/taskRoutes");
 const activityRouter = require("./routes/activityRoutes");
 const globalErorr = require("./controllers/errorController");
 const AppError = require("./utils/appError");
+const connectDB = require("./config/db");
+
+// Force DB connection before handling requests (crucial for Vercel Serverless)
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // CORS
 const allowedOrigins = [
