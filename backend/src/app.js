@@ -82,6 +82,17 @@ app.use((req, res, next) => {
 
 // Route handlers
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "CRM SaaS API is running",
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "success" });
+});
+
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/contacts", contactRouter);
@@ -89,6 +100,13 @@ app.use("/api/v1/deals", dealRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/tasks", taskRouter);
 app.use("/api/v1/activities", activityRouter);
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "Welcome to the CRM SaaS API! The server is running.",
+  });
+});
 
 app.all("*", (req, res, next) => {
   next(new AppError(`can't find ${req.originalUrl} on this server`, 404));
