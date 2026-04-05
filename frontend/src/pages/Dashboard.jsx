@@ -6,6 +6,7 @@ import Deals from './Deals';
 import Tasks from './Tasks';
 import Activities from './Activities';
 import Profile from './Profile';
+import Team from './Team';
 
 const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -45,7 +46,11 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [activeTab]);
 
-  const navItems = ['Overview', 'Contacts', 'Deals', 'Tasks', 'Activities', 'Settings'];
+  const navItems = ['Overview', 'Contacts', 'Deals', 'Tasks', 'Activities'];
+  if (user?.role === 'owner' || user?.role === 'admin') {
+    navItems.push('Team');
+  }
+  navItems.push('Settings');
 
   return (
     <div className="app-container">
@@ -140,6 +145,8 @@ const Dashboard = () => {
             <Tasks />
         ) : activeTab === 'Activities' ? (
             <Activities />
+        ) : activeTab === 'Team' ? (
+            <Team />
         ) : activeTab === 'Settings' ? (
             <Profile />
         ) : (
