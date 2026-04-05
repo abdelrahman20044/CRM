@@ -35,9 +35,16 @@ app.use(
     origin: function (origin, callback) {
       // allow requests with no origin (mobile apps, curl, etc)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+      
+      // Allow localhost for dev
+      if (origin === "http://localhost:5173") return callback(null, true);
+      
+      // Allow exact match from env variable
+      if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
+      
+      // Allow dynamic Vercel preview URLs (useful since Vercel creates new URLs per commit)
+      if (origin.endsWith('.vercel.app')) return callback(null, true);
+
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
@@ -112,16 +119,6 @@ app.get("/", (req, res) => {
   res.status(200).json({
     status: "success",
     message: "Welcome to the CRM SaaS API! The server is running.",
-  });
-});
-
-app.get("/api/v1/debug-db", (req, res) => {
-  const mongoose = require("mongoose");
-  res.status(200).json({
-    readyState: mongoose.connection.readyState, // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
-    hasDatabaseUrl: !!process.env.DATABASE2,
-    hasDatabasePassword: !!process.env.DATABASE_PASSWORD2,
-    dbValueMasked: process.env.DATABASE2 ? process.env.DATABASE2.substring(0, 15) + "..." : "missing",
   });
 });
 
