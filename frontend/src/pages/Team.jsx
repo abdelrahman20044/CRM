@@ -133,10 +133,11 @@ const Team = () => {
                 const isAdmin = targetUser.role === 'admin';
                 const canEdit = !isOwner && !(currentUser.role === 'admin' && isAdmin);
                 
+                const isActive = targetUser.isActive !== false; // treat undefined as active
                 return (
                   <tr key={targetUser._id} style={{ 
                     borderBottom: '1px solid var(--border)',
-                    opacity: targetUser.isActive ? 1 : 0.6,
+                    opacity: isActive ? 1 : 0.6,
                     background: targetUser._id === currentUser._id ? 'rgba(79, 70, 229, 0.05)' : 'transparent'
                   }}>
                     <td style={{ padding: '1rem', fontWeight: 500 }}>
@@ -150,11 +151,11 @@ const Team = () => {
                           padding: '0.25rem 0.5rem', 
                           borderRadius: '6px', 
                           fontSize: '0.75rem', 
-                          background: targetUser.isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(156, 163, 175, 0.1)',
-                          color: targetUser.isActive ? '#34d399' : '#9ca3af',
+                          background: isActive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                          color: isActive ? '#34d399' : '#9ca3af',
                           fontWeight: 600
                         }}>
-                          {targetUser.isActive ? 'Active' : 'Deactivated'}
+                          {isActive ? 'Active' : 'Deactivated'}
                       </span>
                     </td>
                     <td style={{ padding: '1rem', textAlign: 'right' }}>
@@ -162,11 +163,11 @@ const Team = () => {
                         <button onClick={() => openEditModal(targetUser)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', marginRight: '1rem', fontSize: '0.85rem', fontWeight: 600 }}>Edit</button>
                       )}
                       
-                      {currentUser.role === 'owner' && !isOwner && targetUser.isActive && (
+                      {currentUser.role === 'owner' && !isOwner && isActive && (
                         <button onClick={() => handleDeactivate(targetUser._id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>Deactivate</button>
                       )}
 
-                      {!targetUser.isActive && (
+                      {!isActive && (
                         <button onClick={() => handleActivate(targetUser._id)} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>Re-Activate</button>
                       )}
                     </td>
