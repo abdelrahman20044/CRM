@@ -1,22 +1,24 @@
 const Deal = require("../models/Deal");
 const Contact = require("../models/Contact");
-const mongoose = require("mongoose");
 const catchAsync = require("../utils/catchAsync");
 exports.getDashboardStats = catchAsync(async (req, res, next) => {
-  const companyId = new mongoose.Types.ObjectId(req.user.company);
+  const filter = { company: req.user.company._id };
+  if (req.user.role === "sales_rep") {
+    filter.assignedTo = req.user._id;
+  }
 
-  const totalContacts = await Contact.countDocuments({ company: companyId });
-  const totalDeals = await Deal.countDocuments({ company: companyId });
+  const totalContacts = await Contact.countDocuments(filter);
+  const totalDeals = await Deal.countDocuments(filter);
   const wonDeals = await Deal.countDocuments({
-    company: companyId,
+    ...filter,
     stage: "won",
   });
   const openDeals = await Deal.countDocuments({
-    company: companyId,
+    ...filter,
     stage: { $nin: ["won", "lost"] },
   });
   const revenueResult = await Deal.aggregate([
-    { $match: { company: companyId, stage: "won" } },
+    { $match: { ...filter, stage: "won" } },
     { $group: { _id: null, totalRevenue: { $sum: "$value" } } },
   ]);
 
@@ -35,10 +37,13 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
 });
 
 exports.getPipelineData = catchAsync(async (req, res, next) => {
-  const companyId = new mongoose.Types.ObjectId(req.user.company);
+  const filter = { company: req.user.company._id };
+  if (req.user.role === "sales_rep") {
+    filter.assignedTo = req.user._id;
+  }
 
   const pipeline = await Deal.aggregate([
-    { $match: { company: companyId } },
+    { $match: filter },
     {
       $group: {
         _id: "$stage",

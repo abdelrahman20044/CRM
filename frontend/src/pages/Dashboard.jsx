@@ -94,7 +94,11 @@ const Dashboard = () => {
       <main className="main-content">
         <header className="header">
           <div>
-            <h1>{activeTab}</h1>
+            <h1>
+              {activeTab === 'Overview' 
+                ? (user?.role === 'sales_rep' ? 'My Sales Dashboard' : 'Company Overview') 
+                : activeTab}
+            </h1>
             <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>Welcome back to your workspace, {user?.name}</p>
           </div>
         </header>
