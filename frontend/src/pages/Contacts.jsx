@@ -34,7 +34,7 @@ const Contacts = () => {
   // ── Build query string → sent to ApiFeatures on the backend ──
   const buildQuery = useCallback(() => {
     const params = new URLSearchParams();
-    if (search)  params.set('name[regex]', search);   // backend: ApiFeatures.filter()
+    if (search) { params.set('name[regex]', search); params.set('name[options]', 'i'); } // backend: ApiFeatures.filter()
     if (status)  params.set('status', status);
     params.set('sort', sort);                          // backend: ApiFeatures.sort()
     params.set('page', page);                          // backend: ApiFeatures.paginate()

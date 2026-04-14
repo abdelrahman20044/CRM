@@ -35,7 +35,7 @@ const Tasks = () => {
   // ── Build query string → sent to ApiFeatures on the backend ──
   const buildQuery = useCallback(() => {
     const params = new URLSearchParams();
-    if (search)   params.set('title[regex]', search);  // ApiFeatures.filter()
+    if (search)   { params.set('title[regex]', search); params.set('title[options]', 'i'); } // ApiFeatures.filter()
     if (status)   params.set('status', status);
     if (priority) params.set('priority', priority);
     params.set('sort', sort);                           // ApiFeatures.sort()
