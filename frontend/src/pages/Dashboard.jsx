@@ -11,7 +11,8 @@ import Team from './Team';
 const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('Overview');
-  
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [stats, setStats] = useState({ 
     totalContacts: 0, 
     totalDeals: 0, 
@@ -21,6 +22,12 @@ const Dashboard = () => {
   });
   const [pipeline, setPipeline] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Close sidebar when tab changes on mobile
+  const handleTabChange = (item) => {
+    setActiveTab(item);
+    setSidebarOpen(false);
+  };
 
   // Fetch real backend data
   useEffect(() => {
@@ -54,8 +61,14 @@ const Dashboard = () => {
 
   return (
     <div className="app-container">
+      {/* Mobile overlay backdrop */}
+      <div
+        className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="brand">
           <div className="brand-icon">★</div>
           CRM SaaS
@@ -66,7 +79,7 @@ const Dashboard = () => {
             <li 
               key={item} 
               className={`nav-item ${activeTab === item ? 'active' : ''}`}
-              onClick={() => setActiveTab(item)}
+              onClick={() => handleTabChange(item)}
             >
               {item}
             </li>
@@ -76,11 +89,11 @@ const Dashboard = () => {
         {/* User Profile / Logout */}
         <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>
                     {user?.name?.charAt(0) || 'U'}
                 </div>
-                <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{user?.name || 'User'}</div>
+                <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.name || 'User'}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{user?.role || 'Member'}</div>
                 </div>
             </div>
@@ -93,13 +106,25 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="main-content">
         <header className="header">
-          <div>
-            <h1>
-              {activeTab === 'Overview' 
-                ? (user?.role === 'sales_rep' ? 'My Sales Dashboard' : 'Company Overview') 
-                : activeTab}
-            </h1>
-            <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem' }}>Welcome back to your workspace, {user?.name}</p>
+          <div className="header-left">
+            {/* Hamburger – only visible on mobile via CSS */}
+            <button
+              className="hamburger"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open navigation menu"
+            >
+              ☰
+            </button>
+            <div>
+              <h1>
+                {activeTab === 'Overview' 
+                  ? (user?.role === 'sales_rep' ? 'My Sales Dashboard' : 'Company Overview') 
+                  : activeTab}
+              </h1>
+              <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.9rem' }}>
+                Welcome back, {user?.name}
+              </p>
+            </div>
           </div>
         </header>
 
@@ -130,7 +155,7 @@ const Dashboard = () => {
                 {pipeline.length === 0 ? <p style={{ color: 'var(--text-muted)' }}>No pipeline data available.</p> : (
                   <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     {pipeline.map(stage => (
-                      <div key={stage._id} style={{ background: 'var(--bg-dark)', padding: '1rem 1.5rem', borderRadius: '8px', minWidth: '150px' }}>
+                      <div key={stage._id} style={{ background: 'var(--bg-dark)', padding: '1rem 1.5rem', borderRadius: '8px', minWidth: '130px', flex: '1 1 130px' }}>
                         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>{stage._id} Phase</div>
                         <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{stage.count}</div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--secondary)' }}>${stage.totalValue.toLocaleString()}</div>
