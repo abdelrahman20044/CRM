@@ -33,12 +33,9 @@ exports.getTask = catchAsync(async(req,res,next)=>{
 })
 
 exports.createTask = catchAsync(async(req,res,next)=>{
+    // req.body is already validated & whitelisted by Zod
     const task = await Task.create({
-        title: req.body.title,
-        description: req.body.description,
-        dueDate: req.body.dueDate,
-        status: req.body.status,
-        priority: req.body.priority,
+        ...req.body,
         assignedTo: req.user._id,
         createdBy: req.user._id,
         company: req.user.company,
@@ -51,8 +48,7 @@ exports.createTask = catchAsync(async(req,res,next)=>{
 
 exports.updateTask = catchAsync(async(req,res,next)=>{
     const filter = buildFilter(req, req.params.id);
-    delete req.body.company;
-    delete req.body.assignedTo;
+    // req.body is already whitelisted by Zod (no company/assignedTo possible)
     const task = await Task.findOneAndUpdate(filter, req.body, {
         new: true,
         runValidators: true,
@@ -67,11 +63,8 @@ exports.updateTask = catchAsync(async(req,res,next)=>{
 })
 
 exports.changeTaskStatus = catchAsync(async(req,res,next)=>{
+    // req.body.status is guaranteed to be a valid enum value (Zod)
     const { status } = req.body;
-    const allowedStatuses = ["pending", "in-progress", "completed"];
-    if(!allowedStatuses.includes(status)){
-        return next(new AppError("Invalid status value", 400));
-    }
     const filter = buildFilter(req, req.params.id);
     const update = { status };
     if(status === "completed") update.completedAt = new Date();
@@ -89,12 +82,9 @@ exports.changeTaskStatus = catchAsync(async(req,res,next)=>{
 })
 
 exports.assignTask = catchAsync(async(req,res,next)=>{
-    const { assignedTo } = req.body;
-    if(!assignedTo){
-        return next(new AppError("Please provide assignedTo user id", 400));
-    }
+    // req.body.assignedTo is guaranteed to exist and be a valid ObjectId format (Zod)
     const user = await User.findOne({
-        _id: assignedTo,
+        _id: req.body.assignedTo,
         company: req.user.company,
         isActive: true,
     });

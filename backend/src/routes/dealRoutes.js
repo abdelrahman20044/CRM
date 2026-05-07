@@ -8,28 +8,39 @@ const {
   deleteDeal,
   changeDealStage,
   assignDeal,
-  //   getDealStats,
-  //   getPipeline,
 } = require("../controllers/dealController");
 
 const { protect, restrictedTo } = require("../middlewares/auth");
+const validate = require("../middlewares/validate");
+const {
+  createDealSchema,
+  updateDealSchema,
+  changeDealStageSchema,
+  assignDealSchema,
+} = require("../validators/dealValidator");
 
 // Protect all routes
 router.use(protect);
 
-// Stats & Pipeline routes
-// router.get("/stats", getDealStats);
-// router.get("/pipeline", getPipeline);
 
-router.route("/").get(getAllDeals).post(createDeal);
 
-router.patch("/:id/stage", changeDealStage);
-router.patch("/:id/assign", restrictedTo("owner", "admin"), assignDeal);
+router
+  .route("/")
+  .get(getAllDeals)
+  .post(validate(createDealSchema), createDeal);
+
+router.patch("/:id/stage", validate(changeDealStageSchema), changeDealStage);
+router.patch(
+  "/:id/assign",
+  restrictedTo("owner", "admin"),
+  validate(assignDealSchema),
+  assignDeal,
+);
 
 router
   .route("/:id")
   .get(getDeal)
-  .patch(updateDeal)
+  .patch(validate(updateDealSchema), updateDeal)
   .delete(restrictedTo("owner", "admin"), deleteDeal);
 
 module.exports = router;

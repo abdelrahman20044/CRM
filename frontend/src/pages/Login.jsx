@@ -32,7 +32,13 @@ const Login = () => {
       <div style={{ background: 'var(--glass-bg)', padding: '3rem', borderRadius: '16px', border: '1px solid var(--border)', width: '100%', maxWidth: '420px', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <div style={{ fontSize: '2rem', display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-            <div className="brand-icon" style={{ boxShadow: 'none' }}>★</div>
+            <div className="brand-icon" style={{ background: 'transparent', width: 'auto', height: 'auto', display: 'flex', alignItems: 'center', boxShadow: 'none' }}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary, #3b82f6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </div>
           </div>
           <h1 style={{ fontWeight: 600, fontSize: '1.75rem', marginBottom: '0.5rem' }}>Welcome Back</h1>
           <p style={{ color: 'var(--text-muted)' }}>Sign in to your CRM account</p>

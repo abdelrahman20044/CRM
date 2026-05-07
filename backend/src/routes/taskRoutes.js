@@ -11,22 +11,33 @@ const {
   assignTask,
 } = require("../controllers/taskController");
 const { protect, restrictedTo } = require("../middlewares/auth");
+const validate = require("../middlewares/validate");
+const {
+  createTaskSchema,
+  updateTaskSchema,
+  changeTaskStatusSchema,
+  assignTaskSchema,
+} = require("../validators/taskValidator");
 
 router.use(protect);
 
-router.route("/").get(getAllTasks).post(createTask);
+router
+  .route("/")
+  .get(getAllTasks)
+  .post(validate(createTaskSchema), createTask);
 
-router.patch("/:id/status", changeTaskStatus);
+router.patch("/:id/status", validate(changeTaskStatusSchema), changeTaskStatus);
 
 router.patch(
   "/:id/assign",
   restrictedTo("owner", "admin", "manager"),
+  validate(assignTaskSchema),
   assignTask,
 );
 router
   .route("/:id")
   .get(getTask)
-  .patch(updateTask)
+  .patch(validate(updateTaskSchema), updateTask)
   .delete(restrictedTo("owner", "admin"), deleteTask);
 
 module.exports = router;

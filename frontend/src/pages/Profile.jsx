@@ -77,7 +77,7 @@ const Profile = () => {
             </div>
             <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Company Reference</label>
-                <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border)', fontFamily: 'monospace' }}>{user.company || 'N/A'}</div>
+                <div style={{ padding: '0.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border)', fontFamily: 'monospace' }}>{typeof user.company === 'object' && user.company !== null ? user.company.name || user.company._id : user.company || 'N/A'}</div>
             </div>
         </div>
       </div>

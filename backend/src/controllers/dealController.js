@@ -4,18 +4,7 @@ const User = require("../models/User");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const APIFeatures = require("../utils/apiFeatures");
-const  buildFilter  = require("../utils/buildfilter");
-/*const buildFilter = (req, dealId) => {
-  const filter = { company: req.user.company };
-
-  if (dealId) filter._id = dealId;
-
-  if (req.user.role === "sales_rep") {
-    filter.assignedTo = req.user._id;
-  }
-
-  return filter;
-};*/
+const buildFilter = require("../utils/buildfilter");
 
 exports.getAllDeals = catchAsync(async (req, res, next) => {
   const query = buildFilter(req);
@@ -64,14 +53,9 @@ exports.createDeal = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid contact for your company", 400));
   }
 
+  // req.body is already validated & whitelisted by Zod
   const deal = await Deal.create({
-    title: req.body.title,
-    value: req.body.value,
-    currency: req.body.currency,
-    stage: req.body.stage,
-    expectedCloseDate: req.body.expectedCloseDate,
-    notes: req.body.notes,
-
+    ...req.body,
     contact: contact._id,
     assignedTo: req.user._id,
     company: req.user.company,
@@ -86,11 +70,7 @@ exports.createDeal = catchAsync(async (req, res, next) => {
 exports.updateDeal = catchAsync(async (req, res, next) => {
   const filter = buildFilter(req, req.params.id);
 
-  delete req.body.company;
-  delete req.body.assignedTo;
-  delete req.body.contact;
-  delete req.body.stage;
-
+  // req.body is already whitelisted by Zod (no company/assignedTo/contact/stage possible)
   const deal = await Deal.findOneAndUpdate(filter, req.body, {
     new: true,
     runValidators: true,
@@ -109,13 +89,8 @@ exports.updateDeal = catchAsync(async (req, res, next) => {
 });
 
 exports.changeDealStage = catchAsync(async (req, res, next) => {
+  // req.body.stage is guaranteed to be a valid enum value (Zod)
   const { stage } = req.body;
-
-  const allowedStages = ["lead", "qualified", "proposal", "won", "lost"];
-  if (!allowedStages.includes(stage)) {
-    return next(new AppError("Invalid stage value", 400));
-  }
-
   const filter = buildFilter(req, req.params.id);
 
   const update = { stage };
@@ -139,14 +114,9 @@ exports.changeDealStage = catchAsync(async (req, res, next) => {
 });
 
 exports.assignDeal = catchAsync(async (req, res, next) => {
-  const { assignedTo } = req.body;
-
-  if (!assignedTo) {
-    return next(new AppError("Please provide assignedTo user id", 400));
-  }
-
+  // req.body.assignedTo is guaranteed to exist and be a valid ObjectId format (Zod)
   const user = await User.findOne({
-    _id: assignedTo,
+    _id: req.body.assignedTo,
     company: req.user.company,
     isActive: true,
   });
@@ -187,30 +157,3 @@ exports.deleteDeal = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
-
-/*exports.getDealStats = catchAsync(async (req, res, next) => {
-  const stats = await Contact.aggregate([
-    // Match only user's company
-    {
-      $match: { company: req.user.company }
-    },
-    // Group by status and count
-    {
-      $group: {
-        _id: '$status',
-        count: { $sum: 1 }
-      }
-    },
-    // Sort by count descending
-    {
-      $sort: { count: -1 }
-    }
-  ]);
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      stats
-    }
-  });
-});*/

@@ -11,7 +11,6 @@ process.on("uncaughtException", (err) => {
 });
 const app = require("./src/app");
 
-// Vercel handles the server listening implicitly. We only manually listen if not on Vercel production.
 if (process.env.NODE_ENV !== "production") {
   connectDB().catch((err) => {
     console.log(err);

@@ -39,22 +39,15 @@ exports.getUser = catchAsync(async (req, res, next) => {
 });
 
 exports.createUser = catchAsync(async (req, res, next) => {
-  const { name, email, password, passwordConfirm, role } = req.body;
+  // req.body is already validated & whitelisted by Zod
+  // Zod's enum only allows admin/manager/sales_rep (owner is impossible)
 
-  if (role === "owner") {
-    return next(new AppError("Cannot create owner user", 400));
-  }
-
-  if (req.user.role === "admin" && role === "admin") {
+  if (req.user.role === "admin" && req.body.role === "admin") {
     return next(new AppError("Admins cannot create other admins", 403));
   }
 
   const user = await User.create({
-    name,
-    email,
-    password,
-    passwordConfirm,
-    role: role || "sales_rep",
+    ...req.body,
     company: req.user.company,
   });
 
@@ -67,21 +60,10 @@ exports.createUser = catchAsync(async (req, res, next) => {
 });
 
 exports.updateUser = catchAsync(async (req, res, next) => {
-  if (req.body.password || req.body.passwordConfirm) {
-    return next(
-      new AppError(
-        "This route is not for password updates. Use /updatePassword",
-        400,
-      ),
-    );
-  }
-  delete req.body.company;
+  // req.body is already whitelisted by Zod (no password/company fields possible)
+  // Zod's enum only allows admin/manager/sales_rep (owner is impossible)
 
   if (req.body.role) {
-    // Can't change to owner
-    if (req.body.role === "owner") {
-      return next(new AppError("Cannot change role to owner", 400));
-    }
     if (req.user.role === "admin") {
       const targetUser = await User.findById(req.params.id);
       if (!targetUser) {

@@ -47,20 +47,19 @@ const sendErrorProd = (err, res) => {
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
-  if (process.env.NODE_ENV === "development") {
-    sendErrorDev(err, res);
-  }
+
+  // Convert known errors to operational AppErrors (all environments)
+  let error = Object.create(err);
+  if (error.name == "CastError") error = handleCastErrorDB(error);
+  if (error.code == 11000) error = handleDuplicateFieldsDB(error);
+  if (error.name == "ValidationError") error = handleValidationErrorDB(error);
+  if (error.name == "JsonWebTokenError") error = handleJsonWebTokenError();
+  if (error.name == "TokenExpiredError") error = handleTokenExpiredError();
 
   if (process.env.NODE_ENV === "production") {
-    //  let error = { ...err };
-    //let error = err;
-    let error = Object.create(err);
-    if (error.name == "CastError") error = handleCastErrorDB(error); // InvaildID
-    if (error.code == 11000) error = handleDuplicateFieldsDB(error); //not_unique
-    if (error.name == "ValidationError") error = handleValidationErrorDB(error); //notInTheRangeOfValuesInTheModel
-    if (error.name == "JsonWebTokenError") error = handleJsonWebTokenError();
-    if (error.name == "TokenExpiredError") error = handleTokenExpiredError();
-
     sendErrorProd(error, res);
+  } else {
+    // development, test, or any other environment
+    sendErrorDev(error, res);
   }
 };

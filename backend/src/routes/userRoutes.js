@@ -9,17 +9,25 @@ const {
   activateUser,
 } = require("../controllers/userController");
 const { protect, restrictedTo } = require("../middlewares/auth");
+const validate = require("../middlewares/validate");
+const {
+  createUserSchema,
+  updateUserSchema,
+} = require("../validators/userValidator");
 
 router.use(protect);
 
 router.use(restrictedTo("owner", "admin"));
 
-router.route("/").get(getAllUsers).post(createUser);
+router
+  .route("/")
+  .get(getAllUsers)
+  .post(validate(createUserSchema), createUser);
 
 router
   .route("/:id")
   .get(getUser)
-  .patch(updateUser)
+  .patch(validate(updateUserSchema), updateUser)
   .delete(restrictedTo("owner"), deleteUser);
 
 router.patch("/:id/activate", activateUser);

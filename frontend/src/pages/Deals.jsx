@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import api from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 
 const inputStyle = {
   padding: '0.6rem 0.85rem',
@@ -12,6 +13,8 @@ const inputStyle = {
 };
 
 const Deals = () => {
+  const { user } = useContext(AuthContext);
+  const [users, setUsers] = useState([]);
   const [deals, setDeals] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,6 +64,18 @@ const Deals = () => {
   }, [buildQuery]);
 
   useEffect(() => { fetchDeals(); }, [fetchDeals]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (['owner', 'admin'].includes(user?.role)) {
+        try {
+          const res = await api.get('/users');
+          setUsers(res.data.data.users || res.data.data || []);
+        } catch (err) { console.error('Error fetching users:', err); }
+      }
+    };
+    if (user) fetchUsers();
+  }, [user]);
 
   const handleSearchChange = (e) => { setSearch(e.target.value); setPage(1); };
   const handleStageChange  = (e) => { setStage(e.target.value);  setPage(1); };
@@ -112,6 +127,25 @@ const Deals = () => {
       setShowEditModal(false);
       fetchDeals();
     } catch (err) { alert(err.response?.data?.message || 'Error updating deal'); }
+  };
+
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [dealToAssign, setDealToAssign] = useState(null);
+  const [selectedAssignee, setSelectedAssignee] = useState('');
+
+  const openAssignModal = (deal) => {
+    setDealToAssign(deal);
+    setSelectedAssignee(deal.assignedTo?._id || deal.assignedTo || '');
+    setShowAssignModal(true);
+  };
+
+  const handleAssignSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.patch(`/deals/${dealToAssign._id}/assign`, { assignedTo: selectedAssignee });
+      setShowAssignModal(false);
+      fetchDeals();
+    } catch (err) { alert(err.response?.data?.message || 'Error assigning deal'); }
   };
 
   const handleDelete = async (id) => {
@@ -184,7 +218,7 @@ const Deals = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                {['Deal Title', 'Contact', 'Value', 'Stage', 'Close Date', 'Actions'].map(h => (
+                {['Deal Title', 'Contact', 'Value', 'Stage', 'Close Date', 'Assignee', 'Actions'].map(h => (
                   <th key={h} style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -207,7 +241,13 @@ const Deals = () => {
                     <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                       {deal.expectedCloseDate ? new Date(deal.expectedCloseDate).toLocaleDateString() : '—'}
                     </td>
+                    <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                      {deal.assignedTo?.name || 'Unassigned'}
+                    </td>
                     <td style={{ padding: '1rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      {['owner', 'admin'].includes(user?.role) && (
+                        <button onClick={() => openAssignModal(deal)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', marginRight: '1rem', fontSize: '0.85rem', fontWeight: 600 }}>Assign</button>
+                      )}
                       <button onClick={() => openEditModal(deal)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', marginRight: '1rem', fontSize: '0.85rem', fontWeight: 600 }}>Edit</button>
                       <button onClick={() => handleDelete(deal._id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>Delete</button>
                     </td>
@@ -261,6 +301,25 @@ const Deals = () => {
               <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
                 <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(false); }} style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid var(--border)', color: 'white', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>{showEditModal ? 'Save Updates' : 'Save Deal'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Assign Modal ───────────────────────────────────── */}
+      {showAssignModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '1rem' }}>
+          <div style={{ background: 'var(--bg-dark)', padding: '2rem', borderRadius: '16px', width: '100%', maxWidth: '400px', border: '1px solid var(--border)' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Assign Deal</h3>
+            <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <select required value={selectedAssignee} onChange={(e) => setSelectedAssignee(e.target.value)} style={{ ...inputStyle, padding: '0.75rem' }}>
+                <option value="" disabled>Select User</option>
+                {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+              </select>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setShowAssignModal(false)} style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid var(--border)', color: 'white', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" className="btn-primary" style={{ flex: 1 }}>Assign</button>
               </div>
             </form>
           </div>

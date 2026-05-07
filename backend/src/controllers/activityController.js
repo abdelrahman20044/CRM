@@ -44,15 +44,11 @@ exports.getActivity = catchAsync(async (req, res, next) => {
 });
 
 exports.createActivity = catchAsync(async (req, res, next) => {
+  // req.body is already validated & whitelisted by Zod
   const activity = await Activity.create({
+    ...req.body,
     company: req.user.company,
     performedBy: req.user._id,
-    type: req.body.type,
-    title: req.body.title,
-    description: req.body.description,
-    relatedTo: req.body.relatedTo,
-    relatedId: req.body.relatedId,
-    metadata: req.body.metadata,
   });
 
   res.status(201).json({
@@ -64,9 +60,7 @@ exports.createActivity = catchAsync(async (req, res, next) => {
 exports.updateActivity = catchAsync(async (req, res, next) => {
   const filter = buildFilter(req, req.params.id);
 
-  delete req.body.company;
-  delete req.body.performedBy;
-
+  // req.body is already whitelisted by Zod (no company/performedBy possible)
   const activity = await Activity.findOneAndUpdate(filter, req.body, {
     new: true,
     runValidators: true,

@@ -14,7 +14,7 @@ const dashboardRouter = require("./routes/dashboardRoutes");
 const userRouter = require("./routes/userRoutes");
 const taskRouter = require("./routes/taskRoutes");
 const activityRouter = require("./routes/activityRoutes");
-const globalErorr = require("./controllers/errorController");
+const globalErrorHandler = require("./controllers/errorController");
 const AppError = require("./utils/appError");
 const connectDB = require("./config/db");
 
@@ -62,13 +62,15 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-// Limiting requests from same API
-const limiter = rateLimit({
-  max: 300,
-  windowMs: 60 * 60 * 1000, // 1 hour
-  message: "Too many requests from this IP, please try again in an hour!",
-});
-app.use("/api", limiter);
+// Limiting requests from same API (skip in test environment)
+if (process.env.NODE_ENV !== "test") {
+  const limiter = rateLimit({
+    max: 300,
+    windowMs: 60 * 60 * 1000, // 1 hour
+    message: "Too many requests from this IP, please try again in an hour!",
+  });
+  app.use("/api", limiter);
+}
 // Body parser
 app.use(express.json());
 
@@ -99,7 +101,7 @@ app.use((req, res, next) => {
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "success",
-    message: "CRM SaaS API is running",
+    message: "CRM API is running",
   });
 });
 
@@ -115,16 +117,9 @@ app.use("/api/v1/dashboard", dashboardRouter);
 app.use("/api/v1/tasks", taskRouter);
 app.use("/api/v1/activities", activityRouter);
 
-app.get("/", (req, res) => {
-  res.status(200).json({
-    status: "success",
-    message: "Welcome to the CRM SaaS API! The server is running.",
-  });
-});
-
 app.all("*", (req, res, next) => {
   next(new AppError(`can't find ${req.originalUrl} on this server`, 404));
 });
-app.use(globalErorr);
+app.use(globalErrorHandler);
 
 module.exports = app;

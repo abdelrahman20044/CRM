@@ -4,19 +4,8 @@ const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const APIFeatures = require("../utils/apiFeatures");
 const  buildFilter  = require("../utils/buildfilter");
-// ✅ Helper filter (multi-tenancy + role scoping)
-/*const buildFilter = (req, contactId) => {
-  const filter = { company: req.user.company };
 
-  if (contactId) filter._id = contactId;
 
-  if (req.user.role === "sales_rep") {
-    filter.assignedTo = req.user._id;
-  }
-
-  return filter;
-};
-*/
 exports.getAllContacts = catchAsync(async (req, res, next) => {
   const query = buildFilter(req);
 
@@ -54,15 +43,9 @@ exports.getContact = catchAsync(async (req, res, next) => {
 });
 
 exports.createContact = catchAsync(async (req, res, next) => {
+  // req.body is already validated & whitelisted by Zod
   const contact = await Contact.create({
-    name: req.body.name,
-    email: req.body.email,
-    phone: req.body.phone,
-    source: req.body.source,
-    status: req.body.status,
-    notes: req.body.notes,
-
-    // server-enforced fields
+    ...req.body,
     assignedTo: req.user._id,
     company: req.user.company,
   });
@@ -74,15 +57,9 @@ exports.createContact = catchAsync(async (req, res, next) => {
 });
 
 exports.assignContact = catchAsync(async (req, res, next) => {
-  const { assignedTo } = req.body;
-
-  if (!assignedTo) {
-    return next(new AppError("Please provide assignedTo user id", 400));
-  }
-
-  // ✅ must be a user in the same company
+  // req.body.assignedTo is guaranteed to exist and be a valid ObjectId format (Zod)
   const user = await User.findOne({
-    _id: assignedTo,
+    _id: req.body.assignedTo,
     company: req.user.company,
     isActive: true,
   });
@@ -111,9 +88,7 @@ exports.assignContact = catchAsync(async (req, res, next) => {
 exports.updateContact = catchAsync(async (req, res, next) => {
   const filter = buildFilter(req, req.params.id);
 
-  delete req.body.company;
-  delete req.body.assignedTo;
-
+  // req.body is already whitelisted by Zod (no company/assignedTo possible)
   const contact = await Contact.findOneAndUpdate(filter, req.body, {
     new: true,
     runValidators: true,

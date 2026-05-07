@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import api from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 
 const inputStyle = {
   padding: '0.6rem 0.85rem',
@@ -12,6 +13,8 @@ const inputStyle = {
 };
 
 const Tasks = () => {
+  const { user } = useContext(AuthContext);
+  const [users, setUsers] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -58,6 +61,18 @@ const Tasks = () => {
   }, [buildQuery]);
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (['owner', 'admin', 'manager'].includes(user?.role)) {
+        try {
+          const res = await api.get('/users');
+          setUsers(res.data.data.users || res.data.data || []);
+        } catch (err) { console.error('Error fetching users:', err); }
+      }
+    };
+    if (user) fetchUsers();
+  }, [user]);
 
   const handleSearchChange   = (e) => { setSearch(e.target.value);   setPage(1); };
   const handleStatusChange   = (e) => { setStatus(e.target.value);   setPage(1); };
@@ -111,6 +126,25 @@ const Tasks = () => {
         fetchTasks();
       } catch (err) { alert(err.response?.data?.message || 'Error deleting task'); }
     }
+  };
+
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [taskToAssign, setTaskToAssign] = useState(null);
+  const [selectedAssignee, setSelectedAssignee] = useState('');
+
+  const openAssignModal = (task) => {
+    setTaskToAssign(task);
+    setSelectedAssignee(task.assignedTo?._id || task.assignedTo || '');
+    setShowAssignModal(true);
+  };
+
+  const handleAssignSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.patch(`/tasks/${taskToAssign._id}/assign`, { assignedTo: selectedAssignee });
+      setShowAssignModal(false);
+      fetchTasks();
+    } catch (err) { alert(err.response?.data?.message || 'Error assigning task'); }
   };
 
   const priorityStyle = (p) => ({
@@ -175,7 +209,7 @@ const Tasks = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
-                {['Task', 'Priority', 'Status', 'Due Date', 'Actions'].map(h => (
+                {['Task', 'Priority', 'Status', 'Due Date', 'Assignee', 'Actions'].map(h => (
                   <th key={h} style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: 500, fontSize: '0.85rem', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -198,7 +232,7 @@ const Tasks = () => {
                       <select
                         value={task.status}
                         onChange={async (e) => {
-                          try { await api.patch(`/tasks/${task._id}`, { status: e.target.value }); fetchTasks(); }
+                          try { await api.patch(`/tasks/${task._id}/status`, { status: e.target.value }); fetchTasks(); }
                           catch { alert('Could not update status'); }
                         }}
                         style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '6px', padding: '0.25rem 0.5rem', fontSize: '0.85rem' }}
@@ -212,7 +246,13 @@ const Tasks = () => {
                     <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
                       {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No Date'}
                     </td>
+                    <td style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                      {task.assignedTo?.name || 'Unassigned'}
+                    </td>
                     <td style={{ padding: '1rem', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      {['owner', 'admin', 'manager'].includes(user?.role) && (
+                        <button onClick={() => openAssignModal(task)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', marginRight: '1rem', fontSize: '0.85rem', fontWeight: 600 }}>Assign</button>
+                      )}
                       <button onClick={() => openEditModal(task)} style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', marginRight: '1rem', fontSize: '0.85rem', fontWeight: 600 }}>Edit</button>
                       <button onClick={() => handleDelete(task._id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}>Delete</button>
                     </td>
@@ -259,6 +299,25 @@ const Tasks = () => {
               <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
                 <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(false); }} style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid var(--border)', color: 'white', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>{showEditModal ? 'Save Updates' : 'Save Task'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Assign Modal ───────────────────────────────────── */}
+      {showAssignModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '1rem' }}>
+          <div style={{ background: 'var(--bg-dark)', padding: '2rem', borderRadius: '16px', width: '100%', maxWidth: '400px', border: '1px solid var(--border)' }}>
+            <h3 style={{ marginBottom: '1.5rem', fontSize: '1.25rem' }}>Assign Task</h3>
+            <form onSubmit={handleAssignSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <select required value={selectedAssignee} onChange={(e) => setSelectedAssignee(e.target.value)} style={{ ...inputStyle, padding: '0.75rem' }}>
+                <option value="" disabled>Select User</option>
+                {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+              </select>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setShowAssignModal(false)} style={{ flex: 1, padding: '0.75rem', background: 'transparent', border: '1px solid var(--border)', color: 'white', borderRadius: '8px', cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" className="btn-primary" style={{ flex: 1 }}>Assign</button>
               </div>
             </form>
           </div>

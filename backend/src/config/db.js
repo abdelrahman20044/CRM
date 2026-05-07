@@ -7,9 +7,9 @@ const connectDB = async () => {
     return;
   }
 
-  const DB = process.env.DATABASE2.replace(
+  const DB = process.env.DATABASE.replace(
     "<db_password>",
-    process.env.DATABASE_PASSWORD2,
+    process.env.DATABASE_PASSWORD,
   );
 
   try {
