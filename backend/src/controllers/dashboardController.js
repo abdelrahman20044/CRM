@@ -1,11 +1,10 @@
 const Deal = require("../models/Deal");
 const Contact = require("../models/Contact");
 const catchAsync = require("../utils/catchAsync");
+const buildFilter = require("../utils/buildfilter");
+
 exports.getDashboardStats = catchAsync(async (req, res, next) => {
-  const filter = { company: req.user.company._id };
-  if (req.user.role === "sales_rep") {
-    filter.assignedTo = req.user._id;
-  }
+  const filter = buildFilter(req);
 
   const totalContacts = await Contact.countDocuments(filter);
   const totalDeals = await Deal.countDocuments(filter);
@@ -37,10 +36,7 @@ exports.getDashboardStats = catchAsync(async (req, res, next) => {
 });
 
 exports.getPipelineData = catchAsync(async (req, res, next) => {
-  const filter = { company: req.user.company._id };
-  if (req.user.role === "sales_rep") {
-    filter.assignedTo = req.user._id;
-  }
+  const filter = buildFilter(req);
 
   const pipeline = await Deal.aggregate([
     { $match: filter },
