@@ -1,0 +1,15 @@
+{
+  "env": {
+    "node": true,
+    "es2024": true,
+    "jest": true
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^(req|res|next|err)$" }],
+    "no-console": "off",
+    "no-param-reassign": "off"
+  }
+}

@@ -12,9 +12,7 @@ const signToken = (id) => {
   });
 };
 const cookieOptions = {
-  expires: new Date(
-    Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
-  ),
+  expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
   httpOnly: true, // cookie cannot be accessed or modified in any way by the browser to prevent (xss)
   // when browser see httpOnly = true it will receive the cookie store it and send it with every req
 };
@@ -50,7 +48,7 @@ exports.register = catchAsync(async (req, res, next) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
     company: company._id,
-    role: "owner", // ← Always owner for registration
+    role: "owner", // owner for registration
   });
   createSendToken(user, 201, res);
 });
@@ -92,23 +90,14 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     });
   } catch (err) {
     console.log("EMAIL ERROR:", err);
-    ((user.passwordResetToken = undefined),
-      (user.passwordResetExpires = undefined));
+    ((user.passwordResetToken = undefined), (user.passwordResetExpires = undefined));
     await user.save({ validateBeforeSave: false });
 
-    return next(
-      new AppError(
-        "There was an error sending the email try again later!",
-        500,
-      ),
-    );
+    return next(new AppError("There was an error sending the email try again later!", 500));
   }
 });
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  const HashedToken = crypto
-    .createHash("sha256")
-    .update(req.params.token)
-    .digest("hex");
+  const HashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
   const user = await User.findOne({
     passwordResetToken: HashedToken,
     passwordResetExpires: { $gt: Date.now() },

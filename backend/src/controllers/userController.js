@@ -113,11 +113,9 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 exports.activateUser = catchAsync(async (req, res, next) => {
   const filter = buildUserFilter(req, req.params.id);
 
-  const user = await User.findOneAndUpdate(
-    filter,
-    { isActive: true },
-    { new: true },
-  ).select("+isActive");
+  const user = await User.findOneAndUpdate(filter, { isActive: true }, { new: true }).select(
+    "+isActive",
+  );
 
   if (!user) {
     return next(new AppError("User not found in your company", 404));

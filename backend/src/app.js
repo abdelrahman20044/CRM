@@ -25,25 +25,21 @@ app.use(async (req, res, next) => {
 });
 
 // CORS
-const allowedOrigins = [
-  "http://localhost:5173", // local dev
-  process.env.FRONTEND_URL, // Vercel frontend URL
-];
-
 app.use(
   cors({
     origin: function (origin, callback) {
       // allow requests with no origin (mobile apps, curl, etc)
       if (!origin) return callback(null, true);
-      
+
       // Allow localhost for dev
       if (origin === "http://localhost:5173") return callback(null, true);
-      
+
       // Allow exact match from env variable
-      if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
-      
+      if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL)
+        return callback(null, true);
+
       // Allow dynamic Vercel preview URLs (useful since Vercel creates new URLs per commit)
-      if (origin.endsWith('.vercel.app')) return callback(null, true);
+      if (origin.endsWith(".vercel.app")) return callback(null, true);
 
       return callback(new Error("Not allowed by CORS"));
     },
@@ -72,7 +68,7 @@ if (process.env.NODE_ENV !== "test") {
   app.use("/api", limiter);
 }
 // Body parser
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -89,12 +85,6 @@ app.use(
 
 // Serving static files
 app.use(express.static(`${__dirname}/public`));
-
-// Test middleware
-app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  next();
-});
 
 // Route handlers
 

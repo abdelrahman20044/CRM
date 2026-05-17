@@ -93,8 +93,8 @@ exports.changeDealStage = catchAsync(async (req, res, next) => {
   const { stage } = req.body;
   const filter = buildFilter(req, req.params.id);
 
-  const update = { stage };
-  if (stage === "won" || stage === "lost") update.closedAt = new Date();
+  const update = { stage }; // { stage: stage }
+  if (stage === "won" || stage === "lost") update.closedAt = new Date(); // ex update is { stage: "won", closedAt: "2026-05-13..." }
 
   const deal = await Deal.findOneAndUpdate(filter, update, {
     new: true,

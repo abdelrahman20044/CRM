@@ -22,23 +22,10 @@ const createDealSchema = z.object({
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid contact ID format"),
 });
 
-// For PATCH — excludes contact and stage (those have dedicated endpoints)
-const updateDealSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Deal title is required")
-    .max(120, "Deal title must be at most 120 characters")
-    .trim()
-    .optional(),
-  value: z.number().min(0, "Deal value cannot be negative").optional(),
-  currency: z.string().max(3).toUpperCase().trim().optional(),
-  expectedCloseDate: z.coerce.date().optional(),
-  notes: z
-    .string()
-    .max(2000, "Notes must be at most 2000 characters")
-    .trim()
-    .optional(),
-});
+// For PATCH — same fields as create, minus contact & stage (those have dedicated endpoints)
+const updateDealSchema = createDealSchema
+  .omit({ contact: true, stage: true })
+  .partial();
 
 const changeDealStageSchema = z.object({
   stage: z.enum(["lead", "qualified", "proposal", "won", "lost"], {
