@@ -35,7 +35,7 @@ A full-stack CRM application built as a monorepo with a **Node.js/Express REST A
 | **Security** | Helmet, express-rate-limit, xss-clean, express-mongo-sanitize, HPP, CORS |
 | **Email** | Nodemailer |
 | **Testing** | Jest 30, Supertest 7 |
-| **Deployment** | Vercel (Serverless) |
+| **Deployment** | Vercel (Serverless), Docker, Docker Compose |
 
 
 ---
@@ -93,6 +93,7 @@ crm/
 │
 ├── frontend/                   # React SPA (pages, routing, API service layer)
 │
+├── docker-compose.yml          # Run backend + MongoDB with one command
 └── README.md
 ```
 
@@ -104,6 +105,7 @@ crm/
 
 - **Node.js** v18+
 - **MongoDB** — Local install or [MongoDB Atlas](https://www.mongodb.com/atlas) cluster
+- **Docker** (optional) — [Docker Desktop](https://www.docker.com/products/docker-desktop/) for containerized setup
 
 ### 1. Clone the Repository
 
@@ -154,6 +156,16 @@ npm run dev
 ```
 
 The frontend will run at `http://localhost:5173` and proxy API requests to the backend.
+
+### Run with Docker (Alternative)
+
+```bash
+cp backend/.env.example backend/config.env
+# Edit backend/config.env with your values (JWT secret, email credentials, etc.)
+docker-compose up --build
+```
+
+This starts the backend on `http://localhost:3000` and a local MongoDB on port `27017` — no Node.js or MongoDB installation needed.
 
 ### 4. Run Tests
 
