@@ -37,21 +37,13 @@ A full-stack CRM application built as a monorepo with a **Node.js/Express REST A
 | **Testing** | Jest 30, Supertest 7 |
 | **Deployment** | Vercel (Serverless) |
 
-### Frontend
-
-| Category | Technologies |
-|----------|-------------|
-| **Framework** | React 19, Vite 8 |
-| **Routing** | React Router 7 |
-| **HTTP Client** | Axios |
-| **Deployment** | Vercel |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-crm-saas/
+crm/
 ├── backend/                    # Express REST API
 │   ├── server.js               # Entry point & DB connection
 │   ├── vercel.json             # Vercel serverless config
