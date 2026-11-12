@@ -32,125 +32,139 @@ A Customer Relationship Management REST API built with Node.js, Express, and Mon
 
 ### Prerequisites
 
-- Node.js (v18+)
+- Node.js 20.19+ on the 20.x line, or 22.12+ (Mongoose 9 requires at least 20.19)
 - MongoDB (local or [MongoDB Atlas](https://www.mongodb.com/atlas))
 
 ### Installation
 
 ```bash
 git clone https://github.com/abdelrahman20044/CRM.git
-cd crm-saas/backend
-npm install
+cd CRM/backend
+npm ci
+cp .env.example config.env
 ```
 
 ### Environment Variables
 
-Create a `config.env` file in the `backend/` directory:
+In PowerShell, use `Copy-Item .env.example config.env` for the copy step. Edit this private file in `backend/`:
 
 ```env
 NODE_ENV=development
 PORT=3000
-DATABASE=mongodb+srv://<username>:<password>@cluster.mongodb.net/crm-saas
+DATABASE=mongodb://127.0.0.1:27017/crm
 JWT_SECRET=your-secret-key-here
 EXPIRES_IN=90d
 JWT_COOKIE_EXPIRES_IN=90
 
 EMAIL_HOST=smtp.mailtrap.io
-EMAIL_PORT=587
+EMAIL_PORT=2525
 EMAIL_USERNAME=your-mailtrap-username
 EMAIL_PASSWORD=your-mailtrap-password
 
 FRONTEND_URL=http://localhost:5173
 ```
 
-### Run
+Replace the JWT and SMTP placeholders. For Atlas, use your cluster URI in `DATABASE`; a `<db_password>` placeholder is replaced using `DATABASE_PASSWORD` by `src/config/db.js`.
+
+### Local Node.js startup
+
+Run from `CRM/backend` so `server.js` can load `./config.env`:
 
 ```bash
-# Development
 npm start
-
-# Production
-npm run start:prod
-
-# Tests
-npm test
 ```
+
+`npm start` runs `nodemon server.js`, which restarts on file changes. `node server.js` runs once without watching. With `NODE_ENV=development`, the app listens on `PORT` (3000 by default).
+
+### Docker and Vercel startup
+
+- **Local Docker:** from the repository root, run `docker compose up --build` with Docker's engine running and `backend/config.env` present. Compose starts the backend and MongoDB, sets `NODE_ENV=development`, and overrides `DATABASE` to use the `mongo` service. The Dockerfile runs `node server.js` after installing production dependencies; it does not use nodemon. Keep `PORT=3000`. Start the frontend separately. See the [root setup instructions](../README.md#run-with-docker-alternative) for port and shutdown details.
+- **Vercel:** `vercel.json` routes requests to `server.js` using `@vercel/node`. The file exports the Express app; Vercel handles the HTTP listener. In production, `server.js` deliberately skips its own `app.listen()`, and request middleware establishes the database connection. Set private environment variables in Vercel.
+- **Existing `start:prod`:** this script uses `cross-env`, which is not declared in this package. Even with that tool installed separately, `NODE_ENV=production` skips the standalone listener. Do not use it as local or Docker startup instructions. Scripts and production behavior remain unchanged pending a separately tested production-server change.
+
+### Tests and formatting
+
+From `CRM/backend`, `npm test -- __tests__/unit` runs database-free unit tests. Full `npm test` and `npm run test:watch` require MongoDB and JWT configuration.
+
+**Integration tests delete data and drop their connected database.** Override `DATABASE` with an explicit disposable local database, for example `mongodb://127.0.0.1:27017/crm-test`. The helper's Atlas-specific string replacement does not isolate a local development URI and does not safely rename an Atlas URI that already includes a database name. Follow the [root test setup](../README.md#-testing) for PowerShell and Bash commands before running the full suite.
+
+`npm run format:check` checks formatting without writing; `npm run format` rewrites files. There is no backend lint script or installed ESLint. Install dependencies in `backend/` even if root dependencies are present.
 
 ## API Endpoints
 
 ### Authentication
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/auth/register` | Register company + owner | No |
-| POST | `/api/v1/auth/login` | Login | No |
-| POST | `/api/v1/auth/forgotPassword` | Send reset token via email | No |
-| PATCH | `/api/v1/auth/resetPassword/:token` | Reset password | No |
-| GET | `/api/v1/auth/me` | Get current user | Yes |
-| PATCH | `/api/v1/auth/updatePassword` | Update password | Yes |
+| Method | Endpoint                            | Description                | Auth |
+| ------ | ----------------------------------- | -------------------------- | ---- |
+| POST   | `/api/v1/auth/register`             | Register company + owner   | No   |
+| POST   | `/api/v1/auth/login`                | Login                      | No   |
+| POST   | `/api/v1/auth/forgotPassword`       | Send reset token via email | No   |
+| PATCH  | `/api/v1/auth/resetPassword/:token` | Reset password             | No   |
+| GET    | `/api/v1/auth/me`                   | Get current user           | Yes  |
+| PATCH  | `/api/v1/auth/updatePassword`       | Update password            | Yes  |
 
 ### Users (Owner/Admin only)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/users` | List all company users |
-| GET | `/api/v1/users/:id` | Get user by ID |
-| POST | `/api/v1/users` | Create team member |
-| PATCH | `/api/v1/users/:id` | Update user |
-| DELETE | `/api/v1/users/:id` | Deactivate user (soft delete) |
-| PATCH | `/api/v1/users/:id/activate` | Reactivate user |
+| Method | Endpoint                     | Description                   |
+| ------ | ---------------------------- | ----------------------------- |
+| GET    | `/api/v1/users`              | List all company users        |
+| GET    | `/api/v1/users/:id`          | Get user by ID                |
+| POST   | `/api/v1/users`              | Create team member            |
+| PATCH  | `/api/v1/users/:id`          | Update user                   |
+| DELETE | `/api/v1/users/:id`          | Deactivate user (soft delete) |
+| PATCH  | `/api/v1/users/:id/activate` | Reactivate user               |
 
 ### Contacts
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/contacts` | List contacts |
-| GET | `/api/v1/contacts/:id` | Get contact |
-| POST | `/api/v1/contacts` | Create contact |
-| PATCH | `/api/v1/contacts/:id` | Update contact |
-| DELETE | `/api/v1/contacts/:id` | Delete contact |
-| PATCH | `/api/v1/contacts/:id/assign` | Reassign contact (Owner/Admin) |
+| Method | Endpoint                      | Description                    |
+| ------ | ----------------------------- | ------------------------------ |
+| GET    | `/api/v1/contacts`            | List contacts                  |
+| GET    | `/api/v1/contacts/:id`        | Get contact                    |
+| POST   | `/api/v1/contacts`            | Create contact                 |
+| PATCH  | `/api/v1/contacts/:id`        | Update contact                 |
+| DELETE | `/api/v1/contacts/:id`        | Delete contact                 |
+| PATCH  | `/api/v1/contacts/:id/assign` | Reassign contact (Owner/Admin) |
 
 ### Deals
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/deals` | List deals |
-| GET | `/api/v1/deals/:id` | Get deal |
-| POST | `/api/v1/deals` | Create deal |
-| PATCH | `/api/v1/deals/:id` | Update deal |
-| DELETE | `/api/v1/deals/:id` | Delete deal (Owner/Admin) |
-| PATCH | `/api/v1/deals/:id/stage` | Change deal stage |
-| PATCH | `/api/v1/deals/:id/assign` | Reassign deal (Owner/Admin) |
+| Method | Endpoint                   | Description                 |
+| ------ | -------------------------- | --------------------------- |
+| GET    | `/api/v1/deals`            | List deals                  |
+| GET    | `/api/v1/deals/:id`        | Get deal                    |
+| POST   | `/api/v1/deals`            | Create deal                 |
+| PATCH  | `/api/v1/deals/:id`        | Update deal                 |
+| DELETE | `/api/v1/deals/:id`        | Delete deal (Owner/Admin)   |
+| PATCH  | `/api/v1/deals/:id/stage`  | Change deal stage           |
+| PATCH  | `/api/v1/deals/:id/assign` | Reassign deal (Owner/Admin) |
 
 ### Tasks
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/tasks` | List tasks |
-| GET | `/api/v1/tasks/:id` | Get task |
-| POST | `/api/v1/tasks` | Create task |
-| PATCH | `/api/v1/tasks/:id` | Update task |
-| DELETE | `/api/v1/tasks/:id` | Delete task (Owner/Admin) |
-| PATCH | `/api/v1/tasks/:id/status` | Change task status |
-| PATCH | `/api/v1/tasks/:id/assign` | Reassign task (Owner/Admin/Manager) |
+| Method | Endpoint                   | Description                         |
+| ------ | -------------------------- | ----------------------------------- |
+| GET    | `/api/v1/tasks`            | List tasks                          |
+| GET    | `/api/v1/tasks/:id`        | Get task                            |
+| POST   | `/api/v1/tasks`            | Create task                         |
+| PATCH  | `/api/v1/tasks/:id`        | Update task                         |
+| DELETE | `/api/v1/tasks/:id`        | Delete task (Owner/Admin)           |
+| PATCH  | `/api/v1/tasks/:id/status` | Change task status                  |
+| PATCH  | `/api/v1/tasks/:id/assign` | Reassign task (Owner/Admin/Manager) |
 
 ### Activities
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/activities` | List activities (filter by `relatedTo` & `relatedId`) |
-| GET | `/api/v1/activities/:id` | Get activity |
-| POST | `/api/v1/activities` | Log an activity |
-| PATCH | `/api/v1/activities/:id` | Update activity |
-| DELETE | `/api/v1/activities/:id` | Delete activity (Owner/Admin) |
+| Method | Endpoint                 | Description                                           |
+| ------ | ------------------------ | ----------------------------------------------------- |
+| GET    | `/api/v1/activities`     | List activities (filter by `relatedTo` & `relatedId`) |
+| GET    | `/api/v1/activities/:id` | Get activity                                          |
+| POST   | `/api/v1/activities`     | Log an activity                                       |
+| PATCH  | `/api/v1/activities/:id` | Update activity                                       |
+| DELETE | `/api/v1/activities/:id` | Delete activity (Owner/Admin)                         |
 
 ### Dashboard
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/dashboard/stats` | Summary stats (contacts, deals, revenue) |
-| GET | `/api/v1/dashboard/pipeline` | Pipeline breakdown by stage |
+| Method | Endpoint                     | Description                              |
+| ------ | ---------------------------- | ---------------------------------------- |
+| GET    | `/api/v1/dashboard/stats`    | Summary stats (contacts, deals, revenue) |
+| GET    | `/api/v1/dashboard/pipeline` | Pipeline breakdown by stage              |
 
 ### Query Parameters
 
